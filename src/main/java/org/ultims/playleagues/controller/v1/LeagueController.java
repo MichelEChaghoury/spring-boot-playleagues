@@ -22,7 +22,6 @@ import java.util.UUID;
 @RestController
 public class LeagueController {
 
-
     private final LeagueService leagueService;
 
     @Autowired
@@ -96,7 +95,7 @@ public class LeagueController {
             LeagueResponse response = new LeagueResponse(league.getId(), league.getName());
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
-            MessageResponse message = new MessageResponse("No League with id " + id + " was found");
+            MessageResponse message = new MessageResponse("Unable to update league");
             return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
         }
     }

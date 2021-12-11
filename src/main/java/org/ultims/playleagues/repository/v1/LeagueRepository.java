@@ -25,5 +25,4 @@ public interface LeagueRepository extends JpaRepository<League, String> {
 
     @Query(value = "CALL `update_league_name_byId`(:league_id, :league_name);", nativeQuery = true)
     League changeLeagueNameById(@Param("league_id") String leagueId, @Param("league_name") String leagueName);
-    
 }

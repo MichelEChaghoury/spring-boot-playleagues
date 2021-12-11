@@ -219,7 +219,7 @@ class LeagueControllerTest {
         String BASE_URL = ApiRoutes.LEAGUES.UPDATE_BY_ID.replace("{id}", leagueId);
 
         UpdateLeagueRequest requestBody = new UpdateLeagueRequest(newLeagueName);
-        MessageResponse message = new MessageResponse("No League with id " + leagueId + " was found");
+        MessageResponse message = new MessageResponse("Unable to update league");
 
         MockHttpServletRequestBuilder mockRequest;
 

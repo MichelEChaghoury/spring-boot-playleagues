@@ -15,4 +15,15 @@ public class ApiRoutes {
         public static final String UPDATE_BY_ID = API_V1_ROOT_URL + "/" + RESOURCE + "/{id}";
     }
 
+    public static class TEAMS {
+        private static final String RESOURCE = "teams";
+
+        public static final String GET_ALL = API_V1_ROOT_URL + "/" + RESOURCE;
+        public static final String GET_BY_ID = API_V1_ROOT_URL + "/" + RESOURCE + "/{id}";
+        public static final String GET_BY_LEAGUE_ID = API_V1_ROOT_URL + "/" + RESOURCE + "/search";
+        public static final String CREATE = API_V1_ROOT_URL + "/" + RESOURCE;
+        public static final String UPDATE_BY_ID = API_V1_ROOT_URL + "/" + RESOURCE + "/{id}";
+        public static final String DELETE_BY_ID = API_V1_ROOT_URL + "/" + RESOURCE + "/{id}";
+    }
+
 }
