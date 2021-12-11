@@ -33,11 +33,11 @@ public class TeamController {
     public ResponseEntity<List<TeamResponse>> getAllTeams() {
         List<TeamResponse> response = new ArrayList<>();
 
-        teamService.retrieveAll().forEach(team -> response.add(new TeamResponse(team.getId(), team.getName(), team.getLeagueId())));
+        teamService.retrieveAll()
+                .forEach(team -> response.add(new TeamResponse(team.getId(), team.getName(), team.getLeagueId())));
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
 
     @GetMapping(ApiRoutes.TEAMS.GET_BY_ID)
     public ResponseEntity<Object> getTeam(@PathVariable("id") String id) {
@@ -55,7 +55,8 @@ public class TeamController {
     public ResponseEntity<List<TeamResponse>> getTeamsByLeagueId(@RequestParam("leagueId") String leagueId) {
         List<TeamResponse> response = new ArrayList<>();
 
-        teamService.retrieveByLeagueId(leagueId).forEach((team) -> response.add(new TeamResponse(team.getId(), team.getName(), team.getLeagueId())));
+        teamService.retrieveByLeagueId(leagueId)
+                .forEach((team) -> response.add(new TeamResponse(team.getId(), team.getName(), team.getLeagueId())));
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -74,7 +75,8 @@ public class TeamController {
             TeamResponse response = new TeamResponse(id, name, leagueId);
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         } else {
-            MessageResponse messageResponse = new MessageResponse("Unable to create team with name: " + name + " and league Id: " + leagueId);
+            MessageResponse messageResponse = new MessageResponse(
+                    "Unable to create team with name: " + name + " and league Id: " + leagueId);
             return new ResponseEntity<>(messageResponse, HttpStatus.BAD_REQUEST);
         }
 
