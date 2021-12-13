@@ -2,38 +2,50 @@ package org.ultims.playleagues.controller.v1;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.ultims.playleagues.contract.v1.ApiRoutes;
 import org.ultims.playleagues.contract.v1.request.CreateLeagueRequest;
 import org.ultims.playleagues.contract.v1.request.UpdateLeagueRequest;
+import org.ultims.playleagues.contract.v1.response.CreateLeagueResponse;
 import org.ultims.playleagues.contract.v1.response.LeagueResponse;
 import org.ultims.playleagues.contract.v1.response.MessageResponse;
+import org.ultims.playleagues.exception.BadRequestException;
 import org.ultims.playleagues.model.League;
 import org.ultims.playleagues.service.league.LeagueService;
+import org.webjars.NotFoundException;
 
 import javax.validation.Valid;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.springframework.http.ResponseEntity.created;
+import static org.springframework.http.ResponseEntity.ok;
+
 @Tag(name = "League Resource")
+@CrossOrigin("http://localhost:4200")
 @RestController
 public class LeagueController {
 
     private final LeagueService leagueService;
+    private final Environment environment;
 
     @Autowired
-    public LeagueController(LeagueService leagueService) {
+    public LeagueController(LeagueService leagueService, Environment environment) {
         this.leagueService = leagueService;
+        this.environment = environment;
     }
 
     @GetMapping(ApiRoutes.LEAGUES.GET_ALL)
     public ResponseEntity<List<LeagueResponse>> getLeagues() {
         List<LeagueResponse> response = new ArrayList<>();
 
-        leagueService.retrieveAll().forEach(league -> {
+        leagueService.retrieveAll().forEach((league) -> {
             LeagueResponse leagueResponse = new LeagueResponse(league.getId(), league.getName());
             response.add(leagueResponse);
         });
@@ -58,12 +70,11 @@ public class LeagueController {
     public ResponseEntity<Object> getLeagueByName(@RequestParam("name") String name) {
         League league = leagueService.retrieveByName(name);
 
-        if (league == null) {
-            MessageResponse message = new MessageResponse("No League with name " + name + " was found");
-            return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
-        } else {
+        if (league != null) {
             LeagueResponse response = new LeagueResponse(league.getId(), league.getName());
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return ok(response);
+        } else {
+            throw new NotFoundException("No League with name " + name + " was found");
         }
     }
 
@@ -75,12 +86,17 @@ public class LeagueController {
         boolean isCreated = leagueService.create(league);
 
         if (isCreated) {
-            LeagueResponse response = new LeagueResponse(league.getId(), league.getName());
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
+            URI location = ServletUriComponentsBuilder
+                    .fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(id)
+                    .toUri();
+
+            CreateLeagueResponse response = new CreateLeagueResponse(league.getId(), league.getName(), location.toString());
+
+            return created(location).body(response);
         } else {
-            MessageResponse message = new MessageResponse(
-                    "Unable to create league with name: " + league.getName());
-            return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("Unable to create league with name: " + league.getName());
         }
 
     }

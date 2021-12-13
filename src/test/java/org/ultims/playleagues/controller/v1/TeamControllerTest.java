@@ -73,7 +73,6 @@ class TeamControllerTest {
         @DisplayName("should return all teams")
         void shouldReturnAllTeams() throws Exception {
             // Given
-
             leagueRepository.save(new League(leagueId, leagueName));
             teams.forEach(teamRepository::save);
             // When

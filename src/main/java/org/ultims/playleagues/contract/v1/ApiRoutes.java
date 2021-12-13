@@ -26,4 +26,14 @@ public class ApiRoutes {
         public static final String DELETE_BY_ID = API_V1_ROOT_URL + "/" + RESOURCE + "/{id}";
     }
 
+    public static class MATCHES {
+        private static final String RESOURCE = "matches";
+
+        public static final String GET_ALL = API_V1_ROOT_URL + "/" + RESOURCE;
+        public static final String GET_REPORTS = API_V1_ROOT_URL + "/" + RESOURCE + "/reports";
+        public static final String GET_BY_DATE = API_V1_ROOT_URL + "/" + RESOURCE + "/search";
+        public static final String GET_BY_YEAR = API_V1_ROOT_URL + "/" + RESOURCE + "/years" + "/{year}";
+        public static final String GET_BY_TEAM_ID = API_V1_ROOT_URL + "/" + RESOURCE + "/teams" + "/{teamId}";
+    }
+
 }

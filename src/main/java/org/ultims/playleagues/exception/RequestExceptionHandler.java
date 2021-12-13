@@ -6,14 +6,31 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.ultims.playleagues.contract.v1.response.MessageResponse;
+import org.webjars.NotFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
-public class RequestValidationException extends ResponseEntityExceptionHandler {
+public class RequestExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(value = {NotFoundException.class})
+    public ResponseEntity<Object> handleNotFound(NotFoundException exception) {
+        MessageResponse response = new MessageResponse(exception.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(value = {BadRequestException.class})
+    public ResponseEntity<Object> handleBadRequest(BadRequestException exception) {
+        MessageResponse response = new MessageResponse(exception.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
