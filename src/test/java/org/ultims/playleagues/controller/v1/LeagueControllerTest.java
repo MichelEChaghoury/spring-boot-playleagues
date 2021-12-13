@@ -71,7 +71,8 @@ class LeagueControllerTest {
 
             // When / Then
             mockMvc.perform(get(BASE_URL))
-                    .andDo(print()).andExpect(status().isOk())
+                    .andDo(print())
+                    .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$[0].name").isNotEmpty())
                     .andExpect(jsonPath("$[0].id").isString());
