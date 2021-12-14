@@ -2,50 +2,60 @@ package org.ultims.playleagues.service.match.v1;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.ultims.playleagues.mapper.v1.Mapper;
 import org.ultims.playleagues.model.Match;
 import org.ultims.playleagues.model.MatchCard;
-import org.ultims.playleagues.model.Team;
+import org.ultims.playleagues.model.MatchCardReport;
+import org.ultims.playleagues.model.TeamReport;
 import org.ultims.playleagues.repository.v1.MatchRepository;
-import org.ultims.playleagues.repository.v1.TeamRepository;
 import org.ultims.playleagues.service.match.MatchService;
 
-import java.time.LocalDate;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class MatchServiceImpl implements MatchService {
 
+    @PersistenceContext
+    private EntityManager entityManager;
     private final MatchRepository matchRepository;
-    private final TeamRepository teamRepository;
 
     @Autowired
-    public MatchServiceImpl(MatchRepository matchRepository, TeamRepository teamRepository) {
+    public MatchServiceImpl(MatchRepository matchRepository) {
         this.matchRepository = matchRepository;
-        this.teamRepository = teamRepository;
     }
 
     @Override
     public List<MatchCard> getMatchCards() {
-
         List<MatchCard> matchCards = new ArrayList<>();
-        matchRepository.findAll().forEach((match) -> {
-            Team firstTeam = teamRepository.retrieveTeamById(match.getFirstTeamId());
-            Team secondTeam = teamRepository.retrieveTeamById(match.getSecondTeamId());
 
-            MatchCard matchCard = new MatchCard(
-                    match.getId(),
-                    firstTeam.getName(),
-                    match.getFirstTeamScore(),
-                    secondTeam.getName(),
-                    match.getSecondTeamScore(),
-                    match.getDate()
-            );
+        Query query = entityManager.createStoredProcedureQuery("get_all_matches_cards");
+        List<Object[]> resultList = query.getResultList();
 
+        resultList.forEach((record) -> {
+            MatchCard matchCard = Mapper.matchCard(record);
             matchCards.add(matchCard);
         });
 
         return matchCards;
+    }
+
+    @Override
+    public List<MatchCardReport> getMatchCardReports() {
+        List<MatchCardReport> matchCardReports = new ArrayList<>();
+
+        Query query = entityManager.createStoredProcedureQuery("get_matches_cards_reports");
+        List<Object[]> resultList = query.getResultList();
+
+        resultList.forEach((record) -> {
+            MatchCardReport report = Mapper.matchCardReport(record);
+            matchCardReports.add(report);
+        });
+
+        return matchCardReports;
     }
 
     @Override
@@ -54,51 +64,53 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
-    public List<MatchCard> getMatchCardsByDate(LocalDate date) {
-        List<MatchCard> matchCards = getMatchCards();
+    public List<MatchCard> getMatchCardsByYear(String year) {
 
-        List<MatchCard> filteredCards = matchCards
-                .stream()
-                .filter(matchCard -> matchCard.getDate().equals(date))
-                .toList();
-
-        return filteredCards;
-    }
-
-    @Override
-    public List<MatchCard> getMatchCardsByTeam(String teamId) {
-        List<Match> matches = matchRepository.findByFirstTeamIdOrSecondTeamId(teamId, teamId);
         List<MatchCard> matchCards = new ArrayList<>();
 
-        matches.forEach(match -> {
-            Team firstTeam = teamRepository.retrieveTeamById(match.getFirstTeamId());
-            Team secondTeam = teamRepository.retrieveTeamById(match.getSecondTeamId());
+        Query query = entityManager.createNativeQuery("CALL `get_matches_cards_by_year`(?);");
+        query.setParameter(1, year);
+        List<Object[]> resultList = query.getResultList();
 
-            MatchCard matchCard = new MatchCard(
-                    match.getId(),
-                    firstTeam.getName(),
-                    match.getFirstTeamScore(),
-                    secondTeam.getName(),
-                    match.getSecondTeamScore(),
-                    match.getDate()
-            );
-
-            matchCards.add(matchCard);
+        resultList.forEach((record) -> {
+            MatchCard card = Mapper.matchCard(record);
+            matchCards.add(card);
         });
 
         return matchCards;
     }
 
     @Override
-    public List<MatchCard> getMatchCardsByYear(int year) {
-        List<MatchCard> matchCards = getMatchCards();
+    public List<MatchCard> getMatchCardsByTeam(String teamId) {
 
-        List<MatchCard> filteredCards = matchCards
-                .stream()
-                .filter(matchCard -> matchCard.getDate().getYear() == year)
-                .toList();
 
-        return filteredCards;
+        List<MatchCard> matchCards = new ArrayList<>();
+
+        Query query = entityManager.createNativeQuery("CALL `get_match_card_by_team_id`(?);");
+        query.setParameter(1, teamId);
+        List<Object[]> resultList = query.getResultList();
+
+        resultList.forEach((record) -> {
+            MatchCard card = Mapper.matchCard(record);
+            matchCards.add(card);
+        });
+
+        return matchCards;
+
     }
 
+    @Override
+    public List<TeamReport> getTeamReports() {
+        List<TeamReport> teamReports = new ArrayList<>();
+
+        Query query = entityManager.createStoredProcedureQuery("get_total_teams_by_leagues");
+        List<Object[]> resultList = query.getResultList();
+
+        resultList.forEach((record) -> {
+            TeamReport teamReport = Mapper.teamReport(record);
+            teamReports.add(teamReport);
+        });
+
+        return teamReports;
+    }
 }

@@ -9,5 +9,4 @@ import java.util.List;
 @Repository
 public interface MatchRepository extends JpaRepository<Match, String> {
 
-    List<Match> findByFirstTeamIdOrSecondTeamId(String firstTeamId, String secondTeamId);
 }

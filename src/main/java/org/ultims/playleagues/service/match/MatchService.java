@@ -2,19 +2,23 @@ package org.ultims.playleagues.service.match;
 
 import org.ultims.playleagues.model.Match;
 import org.ultims.playleagues.model.MatchCard;
+import org.ultims.playleagues.model.MatchCardReport;
+import org.ultims.playleagues.model.TeamReport;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public interface MatchService {
 
     List<MatchCard> getMatchCards();
 
+    List<MatchCardReport> getMatchCardReports();
+
     List<Match> getAll();
 
-    List<MatchCard> getMatchCardsByDate(LocalDate date);
-
-    List<MatchCard> getMatchCardsByYear(int year);
+    List<MatchCard> getMatchCardsByYear(String year);
 
     List<MatchCard> getMatchCardsByTeam(String teamId);
+
+    List<TeamReport> getTeamReports();
+
 }

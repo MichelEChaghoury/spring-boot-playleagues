@@ -2,7 +2,6 @@ package org.ultims.playleagues.controller.v1;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,12 +32,10 @@ import static org.springframework.http.ResponseEntity.ok;
 public class LeagueController {
 
     private final LeagueService leagueService;
-    private final Environment environment;
 
     @Autowired
-    public LeagueController(LeagueService leagueService, Environment environment) {
+    public LeagueController(LeagueService leagueService) {
         this.leagueService = leagueService;
-        this.environment = environment;
     }
 
     @GetMapping(ApiRoutes.LEAGUES.GET_ALL)
@@ -50,19 +47,19 @@ public class LeagueController {
             response.add(leagueResponse);
         });
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ok(response);
     }
 
     @GetMapping(ApiRoutes.LEAGUES.GET_BY_ID)
     public ResponseEntity<Object> getLeague(@PathVariable("id") String id) {
         League league = leagueService.retrieveById(id);
 
-        if (league == null) {
-            MessageResponse message = new MessageResponse("No League with id " + id + " was found");
-            return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
-        } else {
+        if (league != null) {
             LeagueResponse response = new LeagueResponse(league.getId(), league.getName());
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return ok(response);
+        } else {
+            throw new NotFoundException("No League with id " + id + " was found");
+
         }
     }
 
@@ -109,10 +106,9 @@ public class LeagueController {
 
         if (isUpdated) {
             LeagueResponse response = new LeagueResponse(league.getId(), league.getName());
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return ok(response);
         } else {
-            MessageResponse message = new MessageResponse("Unable to update league");
-            return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("Unable to update league");
         }
     }
 
@@ -125,8 +121,7 @@ public class LeagueController {
             MessageResponse message = new MessageResponse("League with id " + id + " was removed successfully");
             return new ResponseEntity<>(message, HttpStatus.NO_CONTENT);
         } else {
-            MessageResponse message = new MessageResponse("No League with id " + id + " was found");
-            return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
+            throw new NotFoundException("No League with id " + id + " was found");
         }
     }
 }

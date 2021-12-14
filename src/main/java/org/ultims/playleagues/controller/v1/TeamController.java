@@ -10,13 +10,17 @@ import org.ultims.playleagues.contract.v1.request.CreateTeamRequest;
 import org.ultims.playleagues.contract.v1.request.UpdateTeamRequest;
 import org.ultims.playleagues.contract.v1.response.MessageResponse;
 import org.ultims.playleagues.contract.v1.response.TeamResponse;
+import org.ultims.playleagues.exception.BadRequestException;
 import org.ultims.playleagues.model.Team;
 import org.ultims.playleagues.service.team.TeamService;
+import org.webjars.NotFoundException;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static org.springframework.http.ResponseEntity.ok;
 
 @Tag(name = "Team Resource")
 @RestController
@@ -36,18 +40,18 @@ public class TeamController {
         teamService.retrieveAll()
                 .forEach(team -> response.add(new TeamResponse(team.getId(), team.getName(), team.getLeagueId())));
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ok(response);
     }
 
     @GetMapping(ApiRoutes.TEAMS.GET_BY_ID)
-    public ResponseEntity<Object> getTeam(@PathVariable("id") String id) {
+    public ResponseEntity<TeamResponse> getTeam(@PathVariable("id") String id) {
         Team team = teamService.retrieveById(id);
 
-        if (team == null) {
-            var response = new MessageResponse("No team with id: " + id + " was found");
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        if (team != null) {
+            TeamResponse response = new TeamResponse(team.getId(), team.getName(), team.getLeagueId());
+            return ok(response);
         } else {
-            return new ResponseEntity<>(team, HttpStatus.OK);
+            throw new NotFoundException("No team with id: " + id + " was found");
         }
     }
 
@@ -55,10 +59,11 @@ public class TeamController {
     public ResponseEntity<List<TeamResponse>> getTeamsByLeagueId(@RequestParam("leagueId") String leagueId) {
         List<TeamResponse> response = new ArrayList<>();
 
-        teamService.retrieveByLeagueId(leagueId)
-                .forEach((team) -> response.add(new TeamResponse(team.getId(), team.getName(), team.getLeagueId())));
+        teamService.retrieveByLeagueId(leagueId).forEach((team) -> {
+            response.add(new TeamResponse(team.getId(), team.getName(), team.getLeagueId()));
+        });
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ok(response);
     }
 
     @PostMapping(ApiRoutes.TEAMS.CREATE)
@@ -75,9 +80,7 @@ public class TeamController {
             TeamResponse response = new TeamResponse(id, name, leagueId);
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         } else {
-            MessageResponse messageResponse = new MessageResponse(
-                    "Unable to create team with name: " + name + " and league Id: " + leagueId);
-            return new ResponseEntity<>(messageResponse, HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("Unable to create team with name: " + name + " and league Id: " + leagueId);
         }
 
     }
@@ -91,10 +94,9 @@ public class TeamController {
         if (isUpdated) {
             Team updatedTeam = teamService.retrieveById(id);
             TeamResponse response = new TeamResponse(id, teamName, updatedTeam.getLeagueId());
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return ok(response);
         } else {
-            MessageResponse messageResponse = new MessageResponse("Unable to update team");
-            return new ResponseEntity<>(messageResponse, HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("Unable to update team");
         }
     }
 
@@ -107,8 +109,7 @@ public class TeamController {
             MessageResponse response = new MessageResponse("Team with id: " + id + " was removed successfully");
             return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
         } else {
-            MessageResponse response = new MessageResponse("Team with id: " + id + " was not found");
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            throw new NotFoundException("Team with id: " + id + " was not found");
         }
     }
 }
