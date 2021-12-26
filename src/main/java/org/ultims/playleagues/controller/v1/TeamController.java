@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.ultims.playleagues.contract.v1.ApiRoutes;
 import org.ultims.playleagues.contract.v1.request.CreateTeamRequest;
@@ -11,10 +12,10 @@ import org.ultims.playleagues.contract.v1.request.UpdateTeamRequest;
 import org.ultims.playleagues.contract.v1.response.MessageResponse;
 import org.ultims.playleagues.contract.v1.response.TeamResponse;
 import org.ultims.playleagues.exception.BadRequestException;
+import org.ultims.playleagues.exception.NoFoundResponseException;
 import org.ultims.playleagues.model.Team;
 import org.ultims.playleagues.model.TeamLeague;
 import org.ultims.playleagues.service.team.TeamService;
-import org.webjars.NotFoundException;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -23,9 +24,8 @@ import java.util.UUID;
 
 import static org.springframework.http.ResponseEntity.ok;
 
-@Tag(name = "Team Resource")
-@CrossOrigin("http://localhost:4200")
 @RestController
+@Tag(name = "Team Controller")
 public class TeamController {
 
     private final TeamService teamService;
@@ -53,7 +53,7 @@ public class TeamController {
             TeamResponse response = new TeamResponse(team.getId(), team.getName(), team.getLeagueId());
             return ok(response);
         } else {
-            throw new NotFoundException("No team with name: " + name + " was found");
+            throw new NoFoundResponseException("No team with name: " + name + " was found");
         }
     }
 
@@ -72,7 +72,7 @@ public class TeamController {
             TeamResponse response = new TeamResponse(team.getId(), team.getName(), team.getLeagueId());
             return ok(response);
         } else {
-            throw new NotFoundException("No team with id: " + id + " was found");
+            throw new NoFoundResponseException("No team with id: " + id + " was found");
         }
     }
 
@@ -88,6 +88,7 @@ public class TeamController {
     }
 
     @PostMapping(ApiRoutes.TEAMS.CREATE)
+    @PreAuthorize("hasRole('Admin')")
     public ResponseEntity<Object> createTeam(@Valid @RequestBody CreateTeamRequest request) {
         String id = UUID.randomUUID().toString();
         String name = request.name();
@@ -107,6 +108,7 @@ public class TeamController {
     }
 
     @PutMapping(ApiRoutes.TEAMS.UPDATE_BY_ID)
+    @PreAuthorize("hasRole('Admin')")
     public ResponseEntity<Object> updateTeam(@PathVariable("id") String id, @Valid @RequestBody UpdateTeamRequest request) {
         String teamName = request.name();
         Team team = new Team(id, teamName, null);
@@ -122,6 +124,7 @@ public class TeamController {
     }
 
     @DeleteMapping(ApiRoutes.TEAMS.DELETE_BY_ID)
+    @PreAuthorize("hasRole('Admin')")
     public ResponseEntity<Object> deleteTeam(@PathVariable("id") String id) {
         boolean doesExist = teamService.doesExist(id);
 
@@ -130,7 +133,7 @@ public class TeamController {
             MessageResponse response = new MessageResponse("Team with id: " + id + " was removed successfully");
             return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
         } else {
-            throw new NotFoundException("Team with id: " + id + " was not found");
+            throw new NoFoundResponseException("Team with id: " + id + " was not found");
         }
     }
 }

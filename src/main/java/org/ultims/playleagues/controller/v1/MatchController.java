@@ -1,22 +1,22 @@
 package org.ultims.playleagues.controller.v1;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.ultims.playleagues.contract.v1.ApiRoutes;
+import org.ultims.playleagues.exception.NoFoundResponseException;
 import org.ultims.playleagues.model.*;
 import org.ultims.playleagues.service.match.MatchService;
-import org.webjars.NotFoundException;
 
 import java.util.List;
 
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
-@CrossOrigin("http://localhost:4200")
+@Tag(name = "Match Controller")
 public class MatchController {
 
     private final MatchService matchService;
@@ -41,7 +41,7 @@ public class MatchController {
         if (teamCardReport != null) {
             return ok(teamCardReport);
         } else {
-            throw new NotFoundException("Team With Id " + id + " Not Found");
+            throw new NoFoundResponseException("Team With Id " + id + " Not Found");
         }
     }
 
