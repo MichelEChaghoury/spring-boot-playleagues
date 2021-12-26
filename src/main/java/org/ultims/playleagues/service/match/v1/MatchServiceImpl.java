@@ -3,10 +3,7 @@ package org.ultims.playleagues.service.match.v1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.ultims.playleagues.mapper.v1.Mapper;
-import org.ultims.playleagues.model.Match;
-import org.ultims.playleagues.model.MatchCard;
-import org.ultims.playleagues.model.MatchCardReport;
-import org.ultims.playleagues.model.TeamReport;
+import org.ultims.playleagues.model.*;
 import org.ultims.playleagues.repository.v1.MatchRepository;
 import org.ultims.playleagues.service.match.MatchService;
 
@@ -112,5 +109,22 @@ public class MatchServiceImpl implements MatchService {
         });
 
         return teamReports;
+    }
+
+    @Override
+    public TeamCardReport getTeamCardReportById(String teamId) {
+
+        Query query = entityManager.createNativeQuery("CALL `get_team_card_report_by_id`(?);");
+        query.setParameter(1, teamId);
+
+        try {
+            List<Object[]> resultList = query.getResultList();
+
+            Object[] record = resultList.get(0);
+
+            return Mapper.teamCardReport(record);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

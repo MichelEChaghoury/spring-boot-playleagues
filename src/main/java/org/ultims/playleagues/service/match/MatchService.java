@@ -1,9 +1,6 @@
 package org.ultims.playleagues.service.match;
 
-import org.ultims.playleagues.model.Match;
-import org.ultims.playleagues.model.MatchCard;
-import org.ultims.playleagues.model.MatchCardReport;
-import org.ultims.playleagues.model.TeamReport;
+import org.ultims.playleagues.model.*;
 
 import java.util.List;
 
@@ -20,5 +17,7 @@ public interface MatchService {
     List<MatchCard> getMatchCardsByTeam(String teamId);
 
     List<TeamReport> getTeamReports();
+
+    TeamCardReport getTeamCardReportById(String teamId);
 
 }

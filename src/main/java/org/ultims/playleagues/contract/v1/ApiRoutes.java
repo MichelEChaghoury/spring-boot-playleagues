@@ -20,7 +20,9 @@ public class ApiRoutes {
 
         public static final String GET_ALL = API_V1_ROOT_URL + "/" + RESOURCE;
         public static final String GET_BY_ID = API_V1_ROOT_URL + "/" + RESOURCE + "/{id}";
+        public static  final String GET_BY_NAME = API_V1_ROOT_URL + "/" + RESOURCE + "/filter";
         public static final String GET_BY_LEAGUE_ID = API_V1_ROOT_URL + "/" + RESOURCE + "/search";
+        public static final String GET_WITH_LEAGUE = API_V1_ROOT_URL + "/" + RESOURCE + "/leagues";
         public static final String CREATE = API_V1_ROOT_URL + "/" + RESOURCE;
         public static final String UPDATE_BY_ID = API_V1_ROOT_URL + "/" + RESOURCE + "/{id}";
         public static final String DELETE_BY_ID = API_V1_ROOT_URL + "/" + RESOURCE + "/{id}";
@@ -31,9 +33,11 @@ public class ApiRoutes {
 
         public static final String GET_ALL = API_V1_ROOT_URL + "/" + RESOURCE;
         public static final String GET_REPORTS = API_V1_ROOT_URL + "/" + RESOURCE + "/reports";
-            public static final String GET_BY_YEAR = API_V1_ROOT_URL + "/" + RESOURCE + "/years" + "/{year}";
+        public static final String GET_BY_YEAR = API_V1_ROOT_URL + "/" + RESOURCE + "/years" + "/{year}";
         public static final String GET_BY_TEAM_ID = API_V1_ROOT_URL + "/" + RESOURCE + "/teams" + "/{teamId}";
         public static final String GET_TOTAL_TEAMS_PER_LEAGUE = API_V1_ROOT_URL + "/" + RESOURCE + "/teams" + "/reports";
+        public static final String GET_CARD_REPORTS = API_V1_ROOT_URL + "/" + RESOURCE + "/cards";
+        public static final String GET_TEAM_CARD_REPORT_BY_ID = API_V1_ROOT_URL + "/" + RESOURCE + "/cards" + "/{id}";
     }
 
 }

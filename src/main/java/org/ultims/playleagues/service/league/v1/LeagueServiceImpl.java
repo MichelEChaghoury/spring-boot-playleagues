@@ -41,6 +41,7 @@ public class LeagueServiceImpl implements LeagueService {
         return result != null;
     }
 
+
     @Override
     public boolean create(League league) {
         boolean doesExists = doesExist(league.getId());

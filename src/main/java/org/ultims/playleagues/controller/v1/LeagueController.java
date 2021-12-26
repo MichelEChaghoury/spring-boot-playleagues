@@ -1,5 +1,8 @@
 package org.ultims.playleagues.controller.v1;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,6 +41,12 @@ public class LeagueController {
         this.leagueService = leagueService;
     }
 
+    @Operation(summary = "Retrieve all leagues")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "Successfully retrieved all leagues"),
+            }
+    )
     @GetMapping(ApiRoutes.LEAGUES.GET_ALL)
     public ResponseEntity<List<LeagueResponse>> getLeagues() {
         List<LeagueResponse> response = new ArrayList<>();

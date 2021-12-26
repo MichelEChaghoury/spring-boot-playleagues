@@ -3,10 +3,15 @@ package org.ultims.playleagues.service.team.v1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.ultims.playleagues.model.Team;
+import org.ultims.playleagues.model.TeamLeague;
 import org.ultims.playleagues.repository.v1.TeamRepository;
 import org.ultims.playleagues.service.league.LeagueService;
 import org.ultims.playleagues.service.team.TeamService;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -14,6 +19,9 @@ public class TeamServiceImpl implements TeamService {
 
     private final TeamRepository teamRepository;
     private final LeagueService leagueService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Autowired
     public TeamServiceImpl(TeamRepository teamRepository, LeagueService leagueService) {
@@ -84,6 +92,24 @@ public class TeamServiceImpl implements TeamService {
         Team result = retrieveByName(teamName);
 
         return result != null;
+    }
+
+    @Override
+    public List<TeamLeague> getTeamLeagues() {
+        List<TeamLeague> teamLeagues = new ArrayList<>();
+        Query query = entityManager.createStoredProcedureQuery("get_teams_with_league_name");
+        List<Object[]> resultList = query.getResultList();
+
+        resultList.forEach((record) -> {
+            String id = record[0].toString();
+            String name = record[1].toString();
+            String leagueName = record[2].toString();
+
+            TeamLeague teamLeague = new TeamLeague(id, name, leagueName);
+            teamLeagues.add(teamLeague);
+        });
+
+        return teamLeagues;
     }
 
     @Override

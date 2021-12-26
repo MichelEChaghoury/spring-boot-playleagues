@@ -2,20 +2,21 @@ package org.ultims.playleagues.controller.v1;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.ultims.playleagues.contract.v1.ApiRoutes;
-import org.ultims.playleagues.model.Match;
-import org.ultims.playleagues.model.MatchCard;
-import org.ultims.playleagues.model.TeamReport;
+import org.ultims.playleagues.model.*;
 import org.ultims.playleagues.service.match.MatchService;
+import org.webjars.NotFoundException;
 
 import java.util.List;
 
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
+@CrossOrigin("http://localhost:4200")
 public class MatchController {
 
     private final MatchService matchService;
@@ -30,6 +31,25 @@ public class MatchController {
         List<MatchCard> matchCards = matchService.getMatchCards();
 
         return ok(matchCards);
+    }
+
+
+    @GetMapping(ApiRoutes.MATCHES.GET_TEAM_CARD_REPORT_BY_ID)
+    public ResponseEntity<TeamCardReport> getTeamCardReport(@PathVariable String id) {
+        TeamCardReport teamCardReport = matchService.getTeamCardReportById(id);
+
+        if (teamCardReport != null) {
+            return ok(teamCardReport);
+        } else {
+            throw new NotFoundException("Team With Id " + id + " Not Found");
+        }
+    }
+
+    @GetMapping(ApiRoutes.MATCHES.GET_CARD_REPORTS)
+    public ResponseEntity<List<MatchCardReport>> getMatchesCardReports() {
+        List<MatchCardReport> matchCardReports = matchService.getMatchCardReports();
+
+        return ok(matchCardReports);
     }
 
     @GetMapping(ApiRoutes.MATCHES.GET_TOTAL_TEAMS_PER_LEAGUE)

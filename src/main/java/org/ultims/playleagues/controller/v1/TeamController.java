@@ -12,6 +12,7 @@ import org.ultims.playleagues.contract.v1.response.MessageResponse;
 import org.ultims.playleagues.contract.v1.response.TeamResponse;
 import org.ultims.playleagues.exception.BadRequestException;
 import org.ultims.playleagues.model.Team;
+import org.ultims.playleagues.model.TeamLeague;
 import org.ultims.playleagues.service.team.TeamService;
 import org.webjars.NotFoundException;
 
@@ -23,6 +24,7 @@ import java.util.UUID;
 import static org.springframework.http.ResponseEntity.ok;
 
 @Tag(name = "Team Resource")
+@CrossOrigin("http://localhost:4200")
 @RestController
 public class TeamController {
 
@@ -41,6 +43,25 @@ public class TeamController {
                 .forEach(team -> response.add(new TeamResponse(team.getId(), team.getName(), team.getLeagueId())));
 
         return ok(response);
+    }
+
+    @GetMapping(ApiRoutes.TEAMS.GET_BY_NAME)
+    public ResponseEntity<TeamResponse> getTeamByName(@RequestParam("name") String name) {
+        Team team = teamService.retrieveByName(name);
+
+        if (team != null) {
+            TeamResponse response = new TeamResponse(team.getId(), team.getName(), team.getLeagueId());
+            return ok(response);
+        } else {
+            throw new NotFoundException("No team with name: " + name + " was found");
+        }
+    }
+
+    @GetMapping(ApiRoutes.TEAMS.GET_WITH_LEAGUE)
+    public ResponseEntity<List<TeamLeague>> getTeamLeagues() {
+        List<TeamLeague> teamLeagues = teamService.getTeamLeagues();
+
+        return ok(teamLeagues);
     }
 
     @GetMapping(ApiRoutes.TEAMS.GET_BY_ID)

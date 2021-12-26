@@ -3,6 +3,7 @@ package org.ultims.playleagues.mapper.v1;
 
 import org.ultims.playleagues.model.MatchCard;
 import org.ultims.playleagues.model.MatchCardReport;
+import org.ultims.playleagues.model.TeamCardReport;
 import org.ultims.playleagues.model.TeamReport;
 
 import java.time.LocalDate;
@@ -37,5 +38,14 @@ public class Mapper {
         int totalTeams = Integer.parseInt(record[2].toString());
 
         return new TeamReport(id, name, totalTeams);
+    }
+
+    public static TeamCardReport teamCardReport(Object[] record) {
+        String id = record[0].toString();
+        int totalWins = Integer.parseInt(record[1].toString());
+        int totalLosses = Integer.parseInt(record[2].toString());
+        int totalDraws = Integer.parseInt(record[3].toString());
+
+        return new TeamCardReport(id, totalWins, totalLosses, totalDraws);
     }
 }
