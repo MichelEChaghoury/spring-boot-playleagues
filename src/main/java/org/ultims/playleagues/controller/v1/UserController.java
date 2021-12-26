@@ -1,7 +1,6 @@
 package org.ultims.playleagues.controller.v1;
 
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +12,6 @@ import org.ultims.playleagues.service.UserService;
 
 @RestController
 @RequestMapping("api/v1/users")
-@Tag(name = "User Controller")
 public class UserController {
 
     @Autowired

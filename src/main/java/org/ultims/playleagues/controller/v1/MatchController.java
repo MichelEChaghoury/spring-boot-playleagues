@@ -1,6 +1,5 @@
 package org.ultims.playleagues.controller.v1;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +15,6 @@ import java.util.List;
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
-@Tag(name = "Match Controller")
 public class MatchController {
 
     private final MatchService matchService;
