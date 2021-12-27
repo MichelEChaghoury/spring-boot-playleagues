@@ -1,6 +1,5 @@
 package org.ultims.playleagues.controller.v1;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,17 +10,19 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.ultims.playleagues.contract.v1.ApiRoutes;
+import org.ultims.playleagues.contract.v1.request.AuthenticationRequest;
 import org.ultims.playleagues.contract.v1.request.CreateLeagueRequest;
 import org.ultims.playleagues.contract.v1.request.UpdateLeagueRequest;
+import org.ultims.playleagues.contract.v1.response.AuthenticationResponse;
 import org.ultims.playleagues.contract.v1.response.MessageResponse;
 import org.ultims.playleagues.model.League;
 import org.ultims.playleagues.repository.v1.LeagueRepository;
+import org.ultims.playleagues.service.TokenService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -32,18 +33,23 @@ class LeagueControllerTest {
     private final MockMvc mockMvc;
     private final LeagueRepository leagueRepository;
     private final ObjectMapper objectMapper;
+    private final TokenService tokenService;
 
     @Autowired
-    LeagueControllerTest(MockMvc mockMvc, LeagueRepository leagueRepository, ObjectMapper objectMapper) {
+    LeagueControllerTest(MockMvc mockMvc, LeagueRepository leagueRepository, ObjectMapper objectMapper, TokenService tokenService) {
         this.mockMvc = mockMvc;
         this.leagueRepository = leagueRepository;
         this.objectMapper = objectMapper;
+        this.tokenService = tokenService;
     }
+
 
     @BeforeEach
     void setUp() {
         leagueRepository.deleteAll();
     }
+
+    private final AuthenticationRequest user = new AuthenticationRequest("michel.e.chaghoury@playleagues.com", "admin@pass");
 
     @AfterEach
     void tearDown() {
@@ -68,9 +74,18 @@ class LeagueControllerTest {
         void shouldReturnAllLeagues() throws Exception {
             // Given
             leagues.forEach(leagueRepository::save);
+            AuthenticationResponse jwtToken = tokenService.createJwtToken(user);
+            String token = jwtToken.getToken();
 
-            // When / Then
-            mockMvc.perform(get(BASE_URL))
+            // When
+            MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders
+                    .get(BASE_URL)
+                    .header("Authorization", "Bearer " + token)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON);
+
+            // Then
+            mockMvc.perform(mockRequest)
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -93,11 +108,19 @@ class LeagueControllerTest {
         void shouldReturnLeagueFoundWithGivenId() throws Exception {
             // Given
             String leagueName = "english";
-
             leagueRepository.save(new League(leagueId, leagueName));
+            AuthenticationResponse jwtToken = tokenService.createJwtToken(user);
+            String token = jwtToken.getToken();
 
-            // When / Then
-            mockMvc.perform(get(BASE_URL))
+            // When
+            MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders
+                    .get(BASE_URL)
+                    .header("Authorization", "Bearer " + token)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON);
+
+            // Then
+            mockMvc.perform(mockRequest)
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -109,9 +132,18 @@ class LeagueControllerTest {
         @DisplayName("should return 404 NOT FOUND")
         void shouldReturn404NotFoundWhenNoLeagueWithGivenId() throws Exception {
             // Given
+            AuthenticationResponse jwtToken = tokenService.createJwtToken(user);
+            String token = jwtToken.getToken();
 
-            // When / Then
-            mockMvc.perform(get(BASE_URL))
+            // When
+            MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders
+                    .get(BASE_URL)
+                    .header("Authorization", "Bearer " + token)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON);
+
+            // Then
+            mockMvc.perform(mockRequest)
                     .andDo(print())
                     .andExpect(status().isNotFound())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -128,6 +160,18 @@ class LeagueControllerTest {
         String leagueName = "english";
         String responseMessage = "No League with name " + leagueName + " was found";
         String BASE_URL = ApiRoutes.LEAGUES.GET_BY_NAME + "?name=" + leagueName;
+        MockHttpServletRequestBuilder mockRequest;
+
+        @BeforeEach
+        void setUp() throws Exception {
+            AuthenticationResponse jwtToken = tokenService.createJwtToken(user);
+            String token = jwtToken.getToken();
+
+            mockRequest = MockMvcRequestBuilders.get(BASE_URL)
+                    .header("Authorization", "Bearer " + token)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON);
+        }
 
         @Test
         @DisplayName("should return league found with given name")
@@ -136,7 +180,7 @@ class LeagueControllerTest {
             leagueRepository.save(new League(leagueId, leagueName));
 
             // When / Then
-            mockMvc.perform(get(BASE_URL))
+            mockMvc.perform(mockRequest)
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -150,7 +194,7 @@ class LeagueControllerTest {
             // Given
 
             // When / Then
-            mockMvc.perform(get(BASE_URL))
+            mockMvc.perform(mockRequest)
                     .andDo(print())
                     .andExpect(status().isNotFound())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -173,8 +217,14 @@ class LeagueControllerTest {
         MockHttpServletRequestBuilder mockRequest;
 
         @BeforeEach
-        void setUp() throws JsonProcessingException {
+        void setUp() throws Exception {
+
+            AuthenticationResponse jwtToken = tokenService.createJwtToken(user);
+            String token = jwtToken.getToken();
+
+
             mockRequest = MockMvcRequestBuilders.post(BASE_URL)
+                    .header("Authorization", "Bearer " + token)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request));
@@ -225,8 +275,12 @@ class LeagueControllerTest {
         MockHttpServletRequestBuilder mockRequest;
 
         @BeforeEach
-        void setUp() throws JsonProcessingException {
+        void setUp() throws Exception {
+            AuthenticationResponse jwtToken = tokenService.createJwtToken(user);
+            String token = jwtToken.getToken();
+
             mockRequest = MockMvcRequestBuilders.put(BASE_URL)
+                    .header("Authorization", "Bearer " + token)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(requestBody));
@@ -273,8 +327,13 @@ class LeagueControllerTest {
         MockHttpServletRequestBuilder mockRequest;
 
         @BeforeEach
-        void setUp() {
+        void setUp() throws Exception {
+
+            AuthenticationResponse jwtToken = tokenService.createJwtToken(user);
+            String token = jwtToken.getToken();
+
             mockRequest = MockMvcRequestBuilders.delete(BASE_URL)
+                    .header("Authorization", "Bearer " + token)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON);
         }
